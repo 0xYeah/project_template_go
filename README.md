@@ -12,9 +12,9 @@ wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_
 `module_path` must be a valid Go module path (must contain a dot):
 
 ```bash
-bash -s -- github.com/myorg/my_service
-bash -s -- mycompany.com/backend
-bash -s -- gitlab.com/team/api
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- github.com/myorg/my_service
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- mycompany.com/backend
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- gitlab.com/team/api
 ```
 
 ## What it does

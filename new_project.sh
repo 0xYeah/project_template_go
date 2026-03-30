@@ -41,6 +41,8 @@ TARGET_DIR="$(pwd)"
 TMP_DIR="$(mktemp -d)"
 SCAFFOLD="${TMP_DIR}/scaffold"
 
+trap 'rm -rf "${TMP_DIR}"' EXIT
+
 echo "Template : ${TEMPLATE_MODULE}"
 echo "New      : ${NEW_MODULE}"
 echo "Target   : ${TARGET_DIR}"
@@ -56,6 +58,8 @@ rm -f  "${SCAFFOLD}/new_project.sh"
 echo "[2/3] Rewriting module paths and project name..."
 
 while IFS= read -r -d '' file; do
+    # skip binary files
+    grep -qI '' "${file}" 2>/dev/null || continue
     if [[ "$OSTYPE" == "darwin"* ]]; then
         sed -i '' \
             -e "s|${TEMPLATE_MODULE}|${NEW_MODULE}|g" \
