@@ -99,6 +99,13 @@ else
         "${CONFIG}"
 fi
 
+# ── Rename template-named files in example_files/ ────────────────────────────
+for f in "${SCAFFOLD}/example_files/${TEMPLATE_NAME}"*; do
+    [[ -e "$f" ]] || continue
+    new_name="${f/${TEMPLATE_NAME}/${PROJECT_NAME}}"
+    mv "$f" "$new_name"
+done
+
 # ── Clear template changelog entries ─────────────────────────────────────────
 if [[ -d "${SCAFFOLD}/changelog" ]]; then
     rm -f "${SCAFFOLD}/changelog"/*.md
