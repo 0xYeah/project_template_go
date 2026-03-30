@@ -1,21 +1,32 @@
 # project_template_go
 
-A Go project template. Run one command inside your cloned repo to scaffold the full project structure — all module paths, project name, version, and bundle ID are rewritten automatically.
+A Go project template. One command scaffolds a new project — all module paths, project name, version, and bundle ID are rewritten automatically.
 
 ## Quick Start
 
 ```bash
-# 1. Create repo on GitHub, then clone and enter it
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <module_path> [target_dir]
+```
+
+### Mode 1 — already inside cloned repo
+
+```bash
 git clone git@github.com:myorg/my_service.git && cd my_service
-
-# 2. Scaffold
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- github.com/myorg/my_service
-
-# 3. Commit
 git add . && git commit -m "chore: init from project_template_go"
 ```
 
-The script writes directly into the current directory. No subdirectory is created.
+### Mode 2 — create a new directory anywhere
+
+```bash
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- github.com/myorg/my_service ./my_service
+# or any other module path format:
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- mycompany.com/backend ./backend
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- gitlab.com/team/api ./api
+```
+
+> `module_path` must be a valid Go module path (must contain a dot).
+> `target_dir` defaults to the current directory.
 
 ## What it does
 
