@@ -1,0 +1,17 @@
+[Unit]
+Description=project_template_go agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Restart=on-failure
+RestartSec=5s
+ExecStart=/project_template_go/project_template_go
+ExecStop=/bin/kill -TERM $MAINPID
+WorkingDirectory=/project_template_go
+LimitNOFILE=102400
+
+[Install]
+WantedBy=multi-user.target
