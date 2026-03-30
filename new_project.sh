@@ -99,6 +99,11 @@ else
         "${CONFIG}"
 fi
 
+# ── Clear template changelog entries ─────────────────────────────────────────
+if [[ -d "${SCAFFOLD}/changelog" ]]; then
+    rm -f "${SCAFFOLD}/changelog"/*.md
+fi
+
 # ── Copy to target and clean up ──────────────────────────────────────────────
 cp -r "${SCAFFOLD}"/. "${TARGET_DIR}/"
 rm -rf "${TMP_DIR}"
