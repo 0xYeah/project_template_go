@@ -5,23 +5,24 @@ A Go project template. Run one command to scaffold a new project — all module 
 ## Quick Start
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <project_name> [module_path]
+# 先 cd 到你想放新项目的父目录，再运行
+cd ~/your/workspace
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <project_name> <module_path>
 ```
 
 Examples:
 
 ```bash
-# module path defaults to project_name
-wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- my_service
-
-# explicit module path
+cd ~/workspace
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- my_service github.com/myorg/my_service
 
 # custom workspace root (pass env to bash, not wget)
-wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | PROJECT_WORKSPACE=/path/to/ws bash -s -- my_service
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | PROJECT_WORKSPACE=/path/to/ws bash -s -- my_service github.com/myorg/my_service
 ```
 
-New project lands at `$PROJECT_WORKSPACE/<project_name>/` (default: current directory).
+New project lands at `./<project_name>/` relative to where you run the command.
+
+> `module_path` is required and must be a valid Go module path (must contain a dot, e.g. `github.com/myorg/my_service`).
 
 ## What it does
 

@@ -20,7 +20,7 @@ usage() {
     echo "Usage: new <project_name> [module_path]"
     echo ""
     echo "  project_name   directory name for the new project"
-    echo "  module_path    Go module path (default: <project_name>)"
+  echo "  module_path    Go module path, must contain a dot (e.g. github.com/myorg/<project_name>)"
     echo ""
     echo "Environment:"
     echo "  PROJECT_WORKSPACE   root workspace dir (default: ${WORKSPACE})"
@@ -30,8 +30,21 @@ usage() {
 [[ $# -lt 1 ]] && usage
 
 PROJECT_NAME="$1"
-NEW_MODULE="${2:-${PROJECT_NAME}}"
+NEW_MODULE="${2:-}"
 TARGET_DIR="${WORKSPACE}/${PROJECT_NAME}"
+
+if [[ -z "${NEW_MODULE}" ]]; then
+    echo "Error: module_path is required."
+    echo "  A Go module path must contain a dot, e.g. github.com/myorg/${PROJECT_NAME}"
+    echo ""
+    usage
+fi
+
+if [[ "${NEW_MODULE}" != *.* ]]; then
+    echo "Error: invalid module path \"${NEW_MODULE}\": missing dot in first path element."
+    echo "  Example: github.com/myorg/${PROJECT_NAME}"
+    exit 1
+fi
 
 echo "Template : ${TEMPLATE_MODULE}"
 echo "New      : ${NEW_MODULE}"
