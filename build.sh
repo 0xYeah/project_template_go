@@ -59,7 +59,7 @@ function toBuild() {
     [[ -f "./example_files/${product_name}.service" ]] && cp "./example_files/${product_name}.service" "${build_path}/${RUN_MODE}/${product_name}/"
     [[ -f "./example_files/install_${product_name}.sh" ]] && cp "./example_files/install_${product_name}.sh" "${build_path}/${RUN_MODE}/${product_name}/install_${product_name}.sh"
     mkdir -p "${build_path}/${RUN_MODE}/${product_name}/conf"
-    [[ -f "./example_files/config_example.json" ]] && cp "./example_files/config_example.json" "${build_path}/${RUN_MODE}/${product_name}/conf/config.json"
+    [[ -f "./example_files/config_example.yaml" ]] && cp "./example_files/config_example.yaml" "${build_path}/${RUN_MODE}/${product_name}/conf/config.yaml"
 
 
     for extend_app in "${extend_app_names[@]}"; do
@@ -68,7 +68,7 @@ function toBuild() {
         && cp ./example_files/${product_name}_${extend_app}.service ${build_path}/${RUN_MODE}/${product_name}_${extend_app} \
         && cp ./example_files/install_${product_name}_${extend_app}.sh ${build_path}/${RUN_MODE}/${product_name}_${extend_app}/install_${product_name}_${extend_app}.sh \
         && mkdir -p ${build_path}/${RUN_MODE}/${product_name}_${extend_app}/conf \
-        && cp ./example_files/config_${extend_app}_example.json ${build_path}/${RUN_MODE}/${product_name}_${extend_app}/conf/config_${extend_app}.json
+        && cp ./example_files/config_${extend_app}_example.yaml ${build_path}/${RUN_MODE}/${product_name}_${extend_app}/conf/config_${extend_app}.yaml
     done
 
     package_files
