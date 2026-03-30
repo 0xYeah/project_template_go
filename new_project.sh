@@ -1,62 +1,46 @@
 #!/usr/bin/env bash
 # Usage:
-#   bash new_project.sh <project_name> [module_path]
-#   wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <project_name> [module_path]
+#   bash new_project.sh <module_path>
+#   wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <module_path>
 #
-# Examples:
-#   bash new_project.sh my_service
-#   bash new_project.sh my_service github.com/myorg/my_service
+# Run from inside the cloned (empty) project directory:
+#   git clone git@github.com:myorg/my_service.git && cd my_service
+#   wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- github.com/myorg/my_service
 
 set -euo pipefail
 
 TEMPLATE_MODULE="github.com/0xYeah/project_template_go"
 TEMPLATE_NAME="project_template_go"
 
-# Workspace root — defaults to current directory
-# Override: wget -qO- ... | PROJECT_WORKSPACE=/path/to/ws bash -s -- my_service
-WORKSPACE="${PROJECT_WORKSPACE:-$(pwd)}"
-
 usage() {
-    echo "Usage: new <project_name> [module_path]"
+    echo "Usage: bash new_project.sh <module_path>"
     echo ""
-    echo "  project_name   directory name for the new project"
-  echo "  module_path    Go module path, must contain a dot (e.g. github.com/myorg/<project_name>)"
+    echo "  module_path   Go module path, must contain a dot"
+    echo "                e.g. github.com/myorg/my_service"
     echo ""
-    echo "Environment:"
-    echo "  PROJECT_WORKSPACE   root workspace dir (default: ${WORKSPACE})"
+    echo "Run from inside your cloned (empty) project directory."
     exit 1
 }
 
 [[ $# -lt 1 ]] && usage
 
-PROJECT_NAME="$1"
-NEW_MODULE="${2:-}"
-TARGET_DIR="${WORKSPACE}/${PROJECT_NAME}"
-
-if [[ -z "${NEW_MODULE}" ]]; then
-    echo "Error: module_path is required."
-    echo "  A Go module path must contain a dot, e.g. github.com/myorg/${PROJECT_NAME}"
-    echo ""
-    usage
-fi
+NEW_MODULE="$1"
 
 if [[ "${NEW_MODULE}" != *.* ]]; then
     echo "Error: invalid module path \"${NEW_MODULE}\": missing dot in first path element."
-    echo "  Example: github.com/myorg/${PROJECT_NAME}"
+    echo "  Example: github.com/myorg/my_service"
     exit 1
 fi
+
+# Derive project name from last path segment
+PROJECT_NAME="${NEW_MODULE##*/}"
+TARGET_DIR="$(pwd)"
+TMP_DIR="$(mktemp -d)"
 
 echo "Template : ${TEMPLATE_MODULE}"
 echo "New      : ${NEW_MODULE}"
 echo "Target   : ${TARGET_DIR}"
 echo ""
-
-# ── 0. Guard: target must not exist ──────────────────────────────────────────
-if [[ -e "${TARGET_DIR}" ]]; then
-    echo "Error: target already exists: ${TARGET_DIR}"
-    echo "Remove it first or choose a different project name."
-    exit 1
-fi
 
 # ── 1. Install gonew if missing ──────────────────────────────────────────────
 if ! command -v gonew &>/dev/null; then
@@ -66,9 +50,11 @@ else
     echo "[1/4] gonew: $(which gonew)"
 fi
 
-# ── 2. Clone + rename all Go files via gonew ─────────────────────────────────
+# ── 2. Clone + rename all Go files via gonew into tmp dir ────────────────────
 echo "[2/4] Running gonew..."
-gonew "${TEMPLATE_MODULE}" "${NEW_MODULE}" "${TARGET_DIR}"
+gonew "${TEMPLATE_MODULE}" "${NEW_MODULE}" "${TMP_DIR}/scaffold"
+mv "${TMP_DIR}/scaffold"/* "${TMP_DIR}/scaffold"/.[!.]* "${TARGET_DIR}"/ 2>/dev/null || true
+rm -rf "${TMP_DIR}"
 
 cd "${TARGET_DIR}"
 
@@ -115,11 +101,9 @@ done < <(find . -type f \
     -print0)
 
 echo ""
-echo "Done!"
-echo "  cd ${TARGET_DIR}"
-echo "  module: ${NEW_MODULE}"
+echo "Done! module: ${NEW_MODULE}"
 echo ""
 echo "Next steps:"
-echo "  git init && git add . && git commit -m 'chore: init from project_template_go'"
+echo "  git add . && git commit -m 'chore: init from project_template_go'"
 
 rm -f -- "$0"
