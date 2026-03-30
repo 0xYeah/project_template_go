@@ -105,7 +105,17 @@ if [[ -d "${SCAFFOLD}/changelog" ]]; then
 fi
 
 # ── Copy to target and clean up ──────────────────────────────────────────────
+# Preserve existing LICENSE and README.md if present
+for f in LICENSE README.md; do
+    [[ -f "${TARGET_DIR}/${f}" ]] && cp "${TARGET_DIR}/${f}" "${TMP_DIR}/${f}.bak"
+done
+
 cp -r "${SCAFFOLD}"/. "${TARGET_DIR}/"
+
+for f in LICENSE README.md; do
+    [[ -f "${TMP_DIR}/${f}.bak" ]] && cp "${TMP_DIR}/${f}.bak" "${TARGET_DIR}/${f}"
+done
+
 rm -rf "${TMP_DIR}"
 
 echo ""
