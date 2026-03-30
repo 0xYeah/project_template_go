@@ -28,7 +28,9 @@ wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_
    - `ProjectName` → last segment of module path
    - `ProjectVersion` → reset to `v0.0.1`
    - `ProjectBundleID` → `com.<project_name>.<project_name>`
-4. Copies everything into the current directory
-5. Deletes itself
+4. Renames `example_files/` files (`*.service`, `install_*.sh`) to match the new project name
+5. Clears `changelog/` entries
+6. Copies everything into the current directory, preserving existing `LICENSE` and `README.md`
+7. Deletes itself
 
 No extra tools required — only `git` and `bash`.

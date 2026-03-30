@@ -4,7 +4,6 @@
 #   wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <module_path>
 #
 # Run from inside your project directory (already cloned or freshly created).
-# module_path must be a valid Go module path (must contain a dot).
 #
 # Examples:
 #   bash -s -- github.com/myorg/my_service
@@ -30,6 +29,10 @@ usage() {
 
 if [[ -f "go.mod" ]]; then
     NEW_MODULE="$(grep '^module ' go.mod | awk '{print $2}')"
+    if [[ -z "${NEW_MODULE}" ]]; then
+        echo "Error: go.mod found but module path could not be detected."
+        exit 1
+    fi
     echo "Detected module from go.mod: ${NEW_MODULE}"
 elif [[ $# -ge 1 ]]; then
     NEW_MODULE="$1"
