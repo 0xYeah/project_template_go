@@ -11,7 +11,7 @@ RUN_MODE=release
 
 UPLOAD_TMP_DIR=upload_tmp_dir
 
-extend_app_names=("")
+extend_app_names=()
 
 OS_TYPE="Unknown"
 GetOSType(){
@@ -54,12 +54,12 @@ function toBuild() {
     ld_flag_master="-X main.mGitCommitHash=${commit_hash} -X main.mGitCommitTime=${formatted_time} -X main.mGoVersion=${go_version} -X main.mPackageOS=${OS_TYPE} -X main.mPackageTime=${build_time} -X main.mRunMode=${RUN_MODE} -s -w"
 
     echo "build ${product_name}"
-    go build -o ${build_path}/${RUN_MODE}/${product_name}/${product_name} -trimpath -ldflags "${ld_flag_master}" main.go \
-    && chmod a+x ${build_path}/${RUN_MODE}/${product_name}/${product_name} \
-    && cp ./example_files/${product_name}.service ${build_path}/${RUN_MODE}/${product_name} \
-    && cp ./example_files/install_${product_name}.sh ${build_path}/${RUN_MODE}/${product_name}/install_${product_name}.sh \
-    && mkdir -p ${build_path}/${RUN_MODE}/${product_name}/conf \
-    && cp ./example_files/config_example.json ${build_path}/${RUN_MODE}/${product_name}/conf/config.json
+    go build -o "${build_path}/${RUN_MODE}/${product_name}/${product_name}" -trimpath -ldflags "${ld_flag_master}" main.go
+    chmod a+x "${build_path}/${RUN_MODE}/${product_name}/${product_name}"
+    [[ -f "./example_files/${product_name}.service" ]] && cp "./example_files/${product_name}.service" "${build_path}/${RUN_MODE}/${product_name}/"
+    [[ -f "./example_files/install_${product_name}.sh" ]] && cp "./example_files/install_${product_name}.sh" "${build_path}/${RUN_MODE}/${product_name}/install_${product_name}.sh"
+    mkdir -p "${build_path}/${RUN_MODE}/${product_name}/conf"
+    [[ -f "./example_files/config_example.json" ]] && cp "./example_files/config_example.json" "${build_path}/${RUN_MODE}/${product_name}/conf/config.json"
 
 
     for extend_app in "${extend_app_names[@]}"; do
