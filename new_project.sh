@@ -103,11 +103,11 @@ else
 fi
 
 # ── Rename template-named files in example_files/ ────────────────────────────
-for f in "${SCAFFOLD}/example_files/${TEMPLATE_NAME}"*; do
-    [[ -e "$f" ]] || continue
-    new_name="${f/${TEMPLATE_NAME}/${PROJECT_NAME}}"
-    mv "$f" "$new_name"
-done
+while IFS= read -r -d '' f; do
+    base="$(basename "$f")"
+    new_base="${base//${TEMPLATE_NAME}/${PROJECT_NAME}}"
+    [[ "$base" != "$new_base" ]] && mv "$f" "$(dirname "$f")/${new_base}"
+done < <(find "${SCAFFOLD}/example_files" -type f -print0)
 
 # ── Clear template changelog entries ─────────────────────────────────────────
 if [[ -d "${SCAFFOLD}/changelog" ]]; then
