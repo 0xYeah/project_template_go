@@ -1,43 +1,34 @@
 #!/usr/bin/env bash
 # Usage:
-#   bash new_project.sh <module_path> [target_dir]
-#   wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <module_path> [target_dir]
+#   bash new_project.sh <module_path>
+#   wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <module_path>
 #
-# Mode 1 — scaffold into current directory (already inside cloned repo):
-#   cd my_service && wget -qO- ...sh | bash -s -- github.com/myorg/my_service
+# Run from inside your project directory (already cloned or freshly created).
+# module_path must be a valid Go module path (must contain a dot).
 #
-# Mode 2 — create a new directory:
-#   wget -qO- ...sh | bash -s -- github.com/myorg/my_service ./my_service
-#   wget -qO- ...sh | bash -s -- mycompany.com/backend /path/to/backend
+# Examples:
+#   bash -s -- github.com/myorg/my_service
+#   bash -s -- mycompany.com/backend
+#   bash -s -- gitlab.com/team/api
 
 set -euo pipefail
 
+TEMPLATE_REPO="https://github.com/0xYeah/project_template_go.git"
 TEMPLATE_MODULE="github.com/0xYeah/project_template_go"
 TEMPLATE_NAME="project_template_go"
 
 usage() {
-    echo "Usage: bash new_project.sh <module_path> [target_dir]"
+    echo "Usage: bash new_project.sh <module_path>"
     echo ""
     echo "  module_path   Go module path (must contain a dot)"
     echo "                e.g. github.com/myorg/my_service"
     echo "                     mycompany.com/backend"
-    echo "                     gitlab.com/team/api"
-    echo ""
-    echo "  target_dir    where to create the project (default: current directory)"
-    echo ""
-    echo "Mode 1 — already inside cloned repo:"
-    echo "  cd my_service"
-    echo "  wget -qO- ...sh | bash -s -- github.com/myorg/my_service"
-    echo ""
-    echo "Mode 2 — create new directory:"
-    echo "  wget -qO- ...sh | bash -s -- github.com/myorg/my_service ./my_service"
     exit 1
 }
 
 [[ $# -lt 1 ]] && usage
 
 NEW_MODULE="$1"
-TARGET_DIR="${2:-$(pwd)}"
 
 if [[ "${NEW_MODULE}" != *.* ]]; then
     echo "Error: invalid module path \"${NEW_MODULE}\": missing dot in first path element."
@@ -45,64 +36,24 @@ if [[ "${NEW_MODULE}" != *.* ]]; then
     exit 1
 fi
 
-# Derive project name from last path segment
 PROJECT_NAME="${NEW_MODULE##*/}"
+TARGET_DIR="$(pwd)"
 TMP_DIR="$(mktemp -d)"
+SCAFFOLD="${TMP_DIR}/scaffold"
 
 echo "Template : ${TEMPLATE_MODULE}"
 echo "New      : ${NEW_MODULE}"
 echo "Target   : ${TARGET_DIR}"
 echo ""
 
-# ── 0. Guard: if target_dir specified, it must not exist ─────────────────────
-if [[ $# -ge 2 && -e "${TARGET_DIR}" ]]; then
-    echo "Error: target already exists: ${TARGET_DIR}"
-    echo "Remove it first or choose a different directory."
-    exit 1
-fi
+# ── 1. Clone template into tmp ───────────────────────────────────────────────
+echo "[1/3] Cloning template..."
+git clone --depth=1 --quiet "${TEMPLATE_REPO}" "${SCAFFOLD}"
+rm -rf "${SCAFFOLD}/.git"
+rm -f  "${SCAFFOLD}/new_project.sh"
 
-# ── 1. Install gonew if missing ──────────────────────────────────────────────
-if ! command -v gonew &>/dev/null; then
-    echo "[1/4] Installing gonew..."
-    go install golang.org/x/tools/cmd/gonew@latest
-else
-    echo "[1/4] gonew: $(which gonew)"
-fi
-
-# ── 2. Clone + rename via gonew into tmp dir, then move ──────────────────────
-echo "[2/4] Running gonew..."
-gonew "${TEMPLATE_MODULE}" "${NEW_MODULE}" "${TMP_DIR}/scaffold"
-
-if [[ $# -ge 2 ]]; then
-    mv "${TMP_DIR}/scaffold" "${TARGET_DIR}"
-else
-    mv "${TMP_DIR}/scaffold"/* "${TMP_DIR}/scaffold"/.[!.]* "${TARGET_DIR}"/ 2>/dev/null || true
-fi
-rm -rf "${TMP_DIR}"
-
-cd "${TARGET_DIR}"
-
-# ── 3. Reset constants in config/config.go ───────────────────────────────────
-echo "[3/4] Patching config/config.go..."
-
-NEW_BUNDLE_ID="com.${PROJECT_NAME}.${PROJECT_NAME}"
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' \
-        -e "s|ProjectName     = \".*\"|ProjectName     = \"${PROJECT_NAME}\"|" \
-        -e "s|ProjectVersion  = \".*\"|ProjectVersion  = \"v0.0.1\"|" \
-        -e "s|ProjectBundleID = \".*\"|ProjectBundleID = \"${NEW_BUNDLE_ID}\"|" \
-        "config/config.go"
-else
-    sed -i \
-        -e "s|ProjectName     = \".*\"|ProjectName     = \"${PROJECT_NAME}\"|" \
-        -e "s|ProjectVersion  = \".*\"|ProjectVersion  = \"v0.0.1\"|" \
-        -e "s|ProjectBundleID = \".*\"|ProjectBundleID = \"${NEW_BUNDLE_ID}\"|" \
-        "config/config.go"
-fi
-
-# ── 4. Replace template references in non-Go text files ──────────────────────
-echo "[4/4] Replacing references in non-Go files..."
+# ── 2. Replace all references in every file ──────────────────────────────────
+echo "[2/3] Rewriting module paths and project name..."
 
 while IFS= read -r -d '' file; do
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -116,12 +67,33 @@ while IFS= read -r -d '' file; do
             -e "s|${TEMPLATE_NAME}|${PROJECT_NAME}|g" \
             "${file}"
     fi
-done < <(find . -type f \
-    \( -name "*.md" -o -name "*.yml" -o -name "*.yaml" \
-    -o -name "*.xml" -o -name "*.iml" -o -name "*.sh"  \
-    -o -name "*.json" -o -name "*.txt" \) \
-    ! -path "./.git/*" \
+done < <(find "${SCAFFOLD}" -type f \
+    ! -path "*/.git/*" \
     -print0)
+
+# ── 3. Patch config/config.go constants ──────────────────────────────────────
+echo "[3/3] Patching config/config.go..."
+
+NEW_BUNDLE_ID="com.${PROJECT_NAME}.${PROJECT_NAME}"
+CONFIG="${SCAFFOLD}/config/config.go"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' \
+        -e "s|ProjectName     = \".*\"|ProjectName     = \"${PROJECT_NAME}\"|" \
+        -e "s|ProjectVersion  = \".*\"|ProjectVersion  = \"v0.0.1\"|" \
+        -e "s|ProjectBundleID = \".*\"|ProjectBundleID = \"${NEW_BUNDLE_ID}\"|" \
+        "${CONFIG}"
+else
+    sed -i \
+        -e "s|ProjectName     = \".*\"|ProjectName     = \"${PROJECT_NAME}\"|" \
+        -e "s|ProjectVersion  = \".*\"|ProjectVersion  = \"v0.0.1\"|" \
+        -e "s|ProjectBundleID = \".*\"|ProjectBundleID = \"${NEW_BUNDLE_ID}\"|" \
+        "${CONFIG}"
+fi
+
+# ── Copy to target and clean up ──────────────────────────────────────────────
+cp -r "${SCAFFOLD}"/. "${TARGET_DIR}/"
+rm -rf "${TMP_DIR}"
 
 echo ""
 echo "Done! module: ${NEW_MODULE}"
