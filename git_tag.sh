@@ -198,6 +198,7 @@ function git_handle_push() {
     echo "Pre Del Version With v"${pre_del_version_no}
 
     gen_changelog_if_possible \
+    && rm -rf changelog/v${pre_del_version_no}.md \
     && git add . \
     && git commit -m "Release:--: v${next_version_no}_$(date -u +"%Y-%m-%d_%H:%M:%S")"_"UTC" \
     && git tag v${next_version_no} \
@@ -212,7 +213,6 @@ function git_handle_push() {
         && git push ${remote} v${next_version_no}
     done
     git tag -d v${pre_del_version_no}
-    rm -rf changelog/v${pre_del_version_no}.md
 }
 
 handle_input(){
