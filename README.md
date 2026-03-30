@@ -9,12 +9,12 @@ A Go project template. Run one command inside your project directory to scaffold
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <module_path>
 ```
 
-`module_path` must be a valid Go module path (must contain a dot):
+Any valid Go module path works:
 
 ```bash
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- my_project
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- github.com/myorg/my_service
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- mycompany.com/backend
-wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- gitlab.com/team/api
 ```
 
 ## What it does

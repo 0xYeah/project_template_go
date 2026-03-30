@@ -30,11 +30,6 @@ usage() {
 
 NEW_MODULE="$1"
 
-if [[ "${NEW_MODULE}" != *.* ]]; then
-    echo "Error: invalid module path \"${NEW_MODULE}\": missing dot in first path element."
-    echo "  Example: github.com/myorg/my_service"
-    exit 1
-fi
 
 PROJECT_NAME="${NEW_MODULE##*/}"
 TARGET_DIR="$(pwd)"
