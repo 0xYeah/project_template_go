@@ -18,17 +18,26 @@ TEMPLATE_MODULE="github.com/0xYeah/project_template_go"
 TEMPLATE_NAME="project_template_go"
 
 usage() {
-    echo "Usage: bash new_project.sh <module_path>"
+    echo "Usage: bash new_project.sh [module_path]"
     echo ""
-    echo "  module_path   Go module path (must contain a dot)"
-    echo "                e.g. github.com/myorg/my_service"
-    echo "                     mycompany.com/backend"
+    echo "  module_path   Go module path (optional if go.mod already exists)"
+    echo "                e.g. my_project"
+    echo "                     github.com/myorg/my_service"
+    echo ""
+    echo "  If go.mod exists in the current directory, module_path is auto-detected."
     exit 1
 }
 
-[[ $# -lt 1 ]] && usage
-
-NEW_MODULE="$1"
+if [[ -f "go.mod" ]]; then
+    NEW_MODULE="$(grep '^module ' go.mod | awk '{print $2}')"
+    echo "Detected module from go.mod: ${NEW_MODULE}"
+elif [[ $# -ge 1 ]]; then
+    NEW_MODULE="$1"
+else
+    echo "Error: no go.mod found and no module_path provided."
+    echo ""
+    usage
+fi
 
 
 PROJECT_NAME="${NEW_MODULE##*/}"

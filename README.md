@@ -4,14 +4,17 @@ A Go project template. Run one command inside your project directory to scaffold
 
 ## Quick Start
 
+**已有 `go.mod`**（module path 自动读取，无需传参）：
+
 ```bash
-# cd into your project directory first, then:
-wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- <module_path>
+cd my_project
+wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash
 ```
 
-Any valid Go module path works:
+**没有 `go.mod`**（手动传 module path）：
 
 ```bash
+cd my_project
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- my_project
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- github.com/myorg/my_service
 wget -qO- https://raw.githubusercontent.com/0xYeah/project_template_go/main/new_project.sh | bash -s -- mycompany.com/backend
